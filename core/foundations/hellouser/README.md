@@ -78,8 +78,8 @@ No se requieren archivos de configuración de build ni dependencias externas. El
 | `(string-append ...)` | Concatena el saludo con el nombre introducido. |
 | `(exit)` | Finaliza explícitamente la ejecución del programa. |
 
-> **ES:** A diferencia de una implementación que imprime el prompt sin salto de línea, este archivo llama a `newline` inmediatamente después. Por eso la entrada y el saludo comienzan en la línea siguiente.
-> **EN:** Unlike an implementation that prints the prompt without a newline, this file calls `newline` immediately afterward. Therefore, the input and greeting start on the next line.
+> **ES:** A diferencia de una implementación que imprime el prompt sin salto de línea, este archivo llama a `newline` inmediatamente después. Por eso la entrada y el saludo comienzan en la línea siguiente. La forma exacta del prompt y la disponibilidad de `read-line` pueden variar entre implementaciones Scheme.
+> **EN:** Unlike an implementation that prints the prompt without a newline, this file calls `newline` immediately afterward. Therefore, the input and greeting start on the next line. The exact prompt behavior and availability of `read-line` may vary between Scheme implementations.
 
 ---
 
@@ -87,23 +87,16 @@ No se requieren archivos de configuración de build ni dependencias externas. El
 
 ### Requisitos / Requirements
 
-Se necesita un intérprete Scheme compatible con `display`, `newline`, `read-line`, `string-append` y `exit`. En este entorno se verificaron:
+Se necesita una implementación Scheme compatible con `display`, `newline`, `read-line`, `string-append` y `exit`. En este entorno se verificaron:
 
-- **Racket**
 - **MIT/GNU Scheme**
+- **GNU Guile**
 
 Comprobar las instalaciones:
 
 ```bash
-racket --version
 mit-scheme --version
-```
-
-### Ejecutar con Racket / Run with Racket
-
-```bash
-cd scheme/core/foundations/hellouser
-racket -f hello_user.scm
+guile --version
 ```
 
 ### Ejecutar con MIT/GNU Scheme
@@ -113,19 +106,29 @@ cd scheme/core/foundations/hellouser
 mit-scheme --quiet --load hello_user.scm
 ```
 
+### Ejecutar con GNU Guile / Run with GNU Guile
+
+```bash
+cd scheme/core/foundations/hellouser
+guile -c '(use-modules (ice-9 rdelim)) (load "hello_user.scm")'
+```
+
+> **ES:** La versión actual usa el procedimiento `read-line` disponible en MIT/GNU Scheme. Guile puede requerir importar su módulo de delimitadores (`(ice-9 rdelim)`) o adaptar esta llamada al procedimiento equivalente de su runtime. Esa diferencia pertenece a la implementación de Scheme y no cambia la especificación del ejercicio.
+> **EN:** The current version uses the `read-line` procedure available in MIT/GNU Scheme. Guile may require importing its delimiter module (`(ice-9 rdelim)`) or adapting this call to the equivalent procedure in its runtime. This difference belongs to the Scheme implementation and does not change the exercise specification.
+
 El programa muestra el prompt, espera una línea y después imprime el saludo.
 
 ### Ejecutar con entrada redirigida / Run with redirected input
 
 ```bash
 cd scheme/core/foundations/hellouser
-printf 'Ada\n' | racket -f hello_user.scm
+printf 'Ada\n' | mit-scheme --quiet --load hello_user.scm
 ```
 
-También se puede usar MIT/GNU Scheme:
+También se puede usar GNU Guile:
 
 ```bash
-printf 'Ada\n' | mit-scheme --quiet --load hello_user.scm
+printf 'Ada\n' | guile -c '(use-modules (ice-9 rdelim)) (load "hello_user.scm")'
 ```
 
 ### Salida esperada / Expected output
@@ -146,10 +149,12 @@ Hello, Ada!
 
 - **ES:** Scheme no requiere una función `main` para este script; las expresiones se evalúan en el orden en que aparecen.
 - **EN:** Scheme does not require a `main` function for this script; expressions are evaluated in the order in which they appear.
-- **ES:** `read-line` elimina el salto de línea de la entrada y devuelve el nombre como cadena.
-- **EN:** `read-line` removes the input newline and returns the name as a string.
-- **ES:** `hello_user.scm` puede ejecutarse directamente con los dos intérpretes verificados y no genera una estructura de build obligatoria.
-- **EN:** `hello_user.scm` can be run directly with both verified interpreters and does not require a build structure.
+- **ES:** `read-line` elimina el salto de línea de la entrada y devuelve el nombre como cadena en el runtime que lo proporciona.
+- **EN:** `read-line` removes the input newline and returns the name as a string in runtimes that provide it.
+- **ES:** `hello_user.scm` se ejecuta como script con `mit-scheme --quiet --load`; no entra en una sesión interactiva posterior.
+- **EN:** `hello_user.scm` runs as a script with `mit-scheme --quiet --load`; it does not enter a subsequent interactive session.
+- **ES:** Las diferencias de saltos de línea o prompts entre MIT/GNU Scheme y Guile se documentan como comportamiento del runtime, no como fallos del ejercicio.
+- **EN:** Differences in newlines or prompts between MIT/GNU Scheme and Guile are documented as runtime behavior, not as exercise failures.
 
 ---
 

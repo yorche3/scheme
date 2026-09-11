@@ -69,23 +69,16 @@ No se requieren archivos de configuración de build. El programa utiliza únicam
 
 ### Requisitos / Requirements
 
-Se necesita un intérprete Scheme compatible con `display`, `newline` y `exit`. En este entorno se verificaron:
+Se necesita una implementación Scheme compatible con `display`, `newline` y `exit`. En este entorno se verificaron:
 
-- **Racket**
 - **MIT/GNU Scheme**
+- **GNU Guile**
 
 Comprobar las instalaciones:
 
 ```bash
-racket --version
 mit-scheme --version
-```
-
-### Ejecutar con Racket / Run with Racket
-
-```bash
-cd scheme/core/foundations/helloworld
-racket -f hello_world.scm
+guile --version
 ```
 
 ### Ejecutar con MIT/GNU Scheme
@@ -95,13 +88,20 @@ cd scheme/core/foundations/helloworld
 mit-scheme --quiet --load hello_world.scm
 ```
 
+### Ejecutar con GNU Guile / Run with GNU Guile
+
+```bash
+cd scheme/core/foundations/helloworld
+guile -s hello_world.scm
+```
+
 ### Salida esperada / Expected output
 
 ```text
 Hello, World! from Scheme
 ```
 
-La salida verificada con ambos intérpretes es equivalente y contiene un salto de línea al final.
+La salida verificada con MIT/GNU Scheme y GNU Guile es equivalente y contiene un salto de línea al final.
 
 ---
 
@@ -111,8 +111,8 @@ La salida verificada con ambos intérpretes es equivalente y contiene un salto d
 - **EN:** Scheme does not require a `main` function for this script; expressions are evaluated in the order in which they appear.
 - **ES:** `display` se utiliza en lugar de `print` para evitar una representación decorada de la cadena.
 - **EN:** `display` is used instead of `print` to avoid a decorated representation of the string.
-- **ES:** El archivo usa la extensión `.scm` y no necesita una línea `#lang`, por lo que puede ejecutarse con los intérpretes Scheme verificados.
-- **EN:** The file uses the `.scm` extension and does not need a `#lang` line, so it can be run by the verified Scheme interpreters.
+- **ES:** El archivo usa la extensión `.scm` y no necesita una línea `#lang`, por lo que puede ejecutarse con MIT/GNU Scheme y GNU Guile.
+- **EN:** The file uses the `.scm` extension and does not need a `#lang` line, so it can be run by MIT/GNU Scheme and GNU Guile.
 
 ---
 
