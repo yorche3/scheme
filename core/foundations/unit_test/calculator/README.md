@@ -79,9 +79,21 @@ Versiones verificadas:
 
 ### MIT/GNU Scheme con scmunit
 
-La dependencia `scmunit` no está instalada actualmente en este entorno. Por ese motivo, la suite MIT/GNU Scheme está preparada pero su ejecución queda pendiente de instalación manual.
+La suite no copia `scmunit` dentro de cada proyecto. Usa la variable de entorno `SCMUNIT_PATH` para apuntar a una única copia compartida del archivo `scmunit.scm`. En este entorno se instaló en `$HOME/.local/share/scmunit/scmunit.scm`. Si la variable no está definida, la suite busca un fallback local llamado `scmunit.scm` en el directorio de tests.
 
-Cuando `scmunit.scm` esté disponible en `test/` o en el `load path`:
+Configura la ruta una vez por sesión, sustituyendo la ruta por la ubicación real de tu instalación:
+
+```bash
+export SCMUNIT_PATH="$HOME/.local/share/scmunit/scmunit.scm"
+```
+
+También puedes usar una ruta absoluta:
+
+```bash
+export SCMUNIT_PATH="/ruta/completa/a/scmunit.scm"
+```
+
+Después ejecuta la suite:
 
 ```bash
 cd scheme/core/foundations/unit_test/calculator/test
@@ -97,10 +109,10 @@ mit-scheme --quiet --load calculator_test.scm
 La carga inicial esperada es:
 
 ```scheme
-(load "scmunit.scm")
+(load (or (get-environment-variable "SCMUNIT_PATH") "scmunit.scm"))
 ```
 
-`scmunit` usa `assert`, `testcase`, `testcase*` y `scmunit-run*`. No forma parte de MIT/GNU Scheme ni del paquete Debian `scmutils`; debe instalarse manualmente.
+`scmunit` usa `assert`, `testcase`, `testcase*` y `scmunit-run*`. No forma parte de MIT/GNU Scheme ni del paquete Debian `scmutils`; debe instalarse manualmente una sola vez en una ubicación compartida.
 
 ### GNU Guile con SRFI-64
 
@@ -135,18 +147,20 @@ El mensaje `# of expected passes      5` equivale a cinco pruebas aprobadas y ce
 
 ### MIT/GNU Scheme + scmunit
 
-La salida concreta depende de la versión de `scmunit` instalada. La suite está preparada para ejecutar cinco casos agrupados por método:
+La salida verificada con la versión compartida de `scmunit` es:
 
 ```text
-addition
-subtraction
-multiplication
-division
-modulus
-5 tests passed
+ # calculator
+  # addition: . (0.ms)
+  # subtraction: . (0.ms)
+  # multiplication: . (0.ms)
+  # division: . (0.ms)
+  # modulus: . (0.ms)
+
+5 checks ran: 5 passed, 0 failed
 ```
 
-Este resultado es la salida esperada del proyecto, pero todavía no se ha verificado en este entorno porque `scmunit.scm` no está instalado. La verificación queda pendiente de la instalación manual indicada en la sección anterior.
+La ejecución usa la única copia compartida ubicada en `$HOME/.local/share/scmunit/scmunit.scm`; otros entornos deben ajustar `SCMUNIT_PATH` a su propia instalación.
 
 ## 🧠 Operaciones / Operations
 
@@ -172,6 +186,8 @@ Este resultado es la salida esperada del proyecto, pero todavía no se ha verifi
 - **EN:** Module names and operations are shared by both interpreters.
 - **ES:** `scmunit` y SRFI-64 no son intercambiables: cada suite usa la API de su runtime.
 - **EN:** `scmunit` and SRFI-64 are not interchangeable: each suite uses its runtime's API.
+- **ES:** La dependencia MIT/GNU Scheme se mantiene fuera de los proyectos y se comparte mediante `SCMUNIT_PATH`; así no se copia `scmunit.scm` en cada módulo.
+- **EN:** The MIT/GNU Scheme dependency stays outside the projects and is shared through `SCMUNIT_PATH`; `scmunit.scm` is not copied into each module.
 - **ES:** Se usa una estrategia común de código y suites específicas por implementación. MIT/GNU Scheme es la ruta principal; Guile se incorpora con SRFI-64. Racket no se trata como equivalente de ninguno de los dos.
 - **EN:** A shared source module and implementation-specific suites are used. MIT/GNU Scheme is the primary route; Guile is supported through SRFI-64. Racket is not treated as equivalent to either runtime.
 - **ES:** Los cinco casos de prueba están agrupados por operación dentro de cada suite.

@@ -1,5 +1,5 @@
 (load "../src/calculator.scm")
-(load "scmunit.scm")
+(load (or (get-environment-variable "SCMUNIT_PATH") "scmunit.scm"))
 
 (testcase* "calculator" (list
   (testcase "addition" (list
