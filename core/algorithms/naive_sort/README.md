@@ -114,11 +114,11 @@ $ guile --no-auto-compile -s naive_sort_tests_guile.scm
 
 ```text
 $ SCMUNIT_PATH="$HOME/.local/share/scmunit/scmunit.scm" mit-scheme --quiet --load naive_sort_tests.scm
-# naive_sort 
-  # selection_sort 
-    # selection_sort should sort an unsorted array: . (0.ms) 
-    # selection_sort should sort an already sorted array: . (0.ms) 
-    … (24 líneas, una por caso) 
+# naive_sort
+  # selection_sort
+    # selection_sort should sort an unsorted array: . (0.ms)
+    # selection_sort should sort an already sorted array: . (0.ms)
+    … (24 líneas, una por caso)
 24 checks ran: 24 passed, 0 failed
 ```
 
