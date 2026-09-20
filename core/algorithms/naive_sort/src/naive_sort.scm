@@ -16,46 +16,57 @@
 ;;
 ;; Implementación pendiente: la escribe el autor. Esta delegación solo genera el
 ;; esqueleto y las pruebas unitarias.
+;; Elimina la primera aparición de x; `remove` es de SRFI-1 y no está en el
+;; entorno base de Guile ni de MIT/GNU Scheme.
+(define (remove-first x lst)
+  (cond ((null? lst) '())
+        ((= (car lst) x) (cdr lst))
+        (else (cons (car lst) (remove-first x (cdr lst))))))
+
 (define (selection-sort arr)
   (if (not (list? arr))
-      '()
+      #f
       (let loop ((unsorted arr)
                  (sorted '()))
         (if (null? unsorted)
             (reverse sorted)
             (let* ((min (apply min unsorted))
-                   (rest (remove min unsorted)))
+                   (rest (remove-first min unsorted)))
               (loop rest (cons min sorted)))))))
 
 (define (bubble-sort arr)
   (if (not (list? arr))
-      '()
-      (let loop ((lst arr)
-                 (swapped #t))
-        (if (not swapped)
-            lst
-            (let loop2 ((unsorted lst)
-                        (sorted '())
-                        (swapped #f))
-              (if (null? (cdr unsorted))
-                  (loop (reverse (cons (car unsorted) sorted)) swapped)
-                  (if (> (car unsorted) (cadr unsorted))
-                      (loop2 (cons (car unsorted) (cddr unsorted))
-                             (cons (cadr unsorted) sorted)
-                             #t)
-                      (loop2 (cdr unsorted)
-                             (cons (car unsorted) sorted)
-                             swapped))))))))
+      #f
+      (if (or (null? arr) (null? (cdr arr)))
+          arr
+          (let loop ((lst arr)
+                     (swapped #t))
+            (if (not swapped)
+                lst
+                (let loop2 ((unsorted lst)
+                            (sorted '())
+                            (swapped #f))
+                  (if (null? (cdr unsorted))
+                      (loop (reverse (cons (car unsorted) sorted)) swapped)
+                      (if (> (car unsorted) (cadr unsorted))
+                          (loop2 (cons (car unsorted) (cddr unsorted))
+                                 (cons (cadr unsorted) sorted)
+                                 #t)
+                          (loop2 (cdr unsorted)
+                                 (cons (car unsorted) sorted)
+                                 swapped)))))))))
 
 (define (insertion-sort arr)
   (if (not (list? arr))
-      '()
+      #f
       (let loop ((unsorted arr)
                  (sorted '()))
         (if (null? unsorted)
-            (reverse sorted)
-            (let insert ((x (car unsorted))
-                         (sorted sorted))
-              (if (or (null? sorted) (< x (car sorted)))
-                  (loop (cdr unsorted) (cons x sorted))
-                  (insert x (cdr sorted) (cons (car sorted) (cdr sorted)))))))))
+            sorted
+            (loop (cdr unsorted)
+                  (let insert ((x (car unsorted))
+                               (pending sorted))
+                    (cond ((null? pending) (list x))
+                          ((< x (car pending)) (cons x pending))
+                          (else (cons (car pending)
+                                      (insert x (cdr pending)))))))))))
