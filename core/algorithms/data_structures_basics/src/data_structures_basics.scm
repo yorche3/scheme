@@ -13,21 +13,16 @@
 ;;               queue-peek, queue-size
 ;;   Estado vacío: empty-linked-list, empty-stack, empty-queue
 ;;
-;; Adecuaciones de centinela de esta fase (todavía no hay fallos reales: son
-;; centinelas, uno por tipo de retorno):
-;;   - **int → -1**: las lecturas enteras que pueden fallar (`linked-list-head`,
-;;     `stack-peek`, `queue-peek`) y los tamaños mientras son esqueletos
-;;     (`linked-list-size`, `stack-size`, `queue-size`).
-;;   - **bool → #f**: `linked-list-empty?`, `stack-empty?`, `queue-empty?`.
+;; Indicadores de esta fase (no hay fallos reales: son centinelas, uno por tipo
+;; de retorno):
+;;   - **int → -1**: las lecturas enteras que pueden fallar
+;;     (`linked-list-head`, `stack-peek`, `queue-peek`).
+;;   - **bool → #t/#f**: `linked-list-empty?`, `stack-empty?`, `queue-empty?`.
 ;;   - **Solo las estructuras y los nodos usan nulo (#f)**: el enlace ausente
-;;     (`node-next`), `node-with-next`, las operaciones que devuelven una
-;;     estructura nueva mientras son esqueletos (`linked-list-insert-head`,
-;;     `linked-list-insert-tail`, `linked-list-delete`, `stack-push`,
-;;     `queue-enqueue`) y el resultado de `stack-pop`/`queue-dequeue`, que es
-;;     `(cons valor estructura-nueva)` o `#f` cuando está vacía.
-;;   - Los esqueletos de `stack-pop` y `queue-dequeue` devuelven
-;;     `(cons -1 <la misma estructura>)`: el centinela entero viaja en el par.
-;;   - Ningún cuerpo llama a `error` ni lanza excepciones: son esqueletos.
+;;     (`node-next`), `linked-list-delete` cuando el valor no estaba o la lista ya
+;;     estaba vacía, y el resultado de `stack-pop`/`queue-dequeue`, que es
+;;     `(cons valor estructura-nueva)` o #f cuando está vacía.
+;;   - Ningún cuerpo llama a `error` ni lanza excepciones.
 ;;
 ;; Forma: módulo de Guile (`define-module`), el idioma de Guile y el estándar
 ;; acordado para Scheme en este repositorio (Guile-solo: MIT/GNU Scheme no
@@ -35,8 +30,25 @@
 ;; `(use-modules (data_structures_basics))`, y se ejecutan con
 ;; `guile --no-auto-compile -s <suite>_guile.scm`. Los records vienen de SRFI-9.
 ;;
-;; Implementación pendiente: la escribe el autor. Esta delegación solo genera el
-;; contrato (firmas y esqueletos) con las adecuaciones de salida.
+;; Decisiones de implementación (las recoge el README del lenguaje):
+;;   - Los `Node` y las tres estructuras son **inmutables**: cada operación
+;;     devuelve un valor nuevo en vez de mutar. Por eso `linked-list-insert-tail`
+;;     y `queue-enqueue` son **O(n)** —hay que rehacer el último enlace y, con
+;;     nodos inmutables, todo el camino que llega hasta él— frente al O(1) que
+;;     pide la especificación. El resto conserva la complejidad prometida:
+;;     `insert-head` y `push`, O(1); `size`, `is_empty`, `head`, `peek` y
+;;     `pop`/`dequeue`, O(1) sobre `head`/`top`/`front` y el contador; `delete`,
+;;     O(n).
+;;   - `LinkedList` mantiene `head`, `tail` y `count`; `Stack`, `top` y `count`;
+;;     `Queue`, `front`, `rear` y `count`. `tail` y `rear` se recalculan en las
+;;     operaciones que reconstruyen la cadena, para seguir señalando el último
+;;     nodo: borrar la cola y volver a insertar por el final sigue encontrando lo
+;;     insertado.
+;;   - `delete` borra la primera aparición y devuelve la lista nueva —puede quedar
+;;     vacía—; devuelve #f si el valor no estaba o si la lista ya estaba vacía.
+;;   - `pop`/`dequeue` devuelven `(cons valor estructura-nueva)` en éxito y #f si
+;;     la estructura está vacía: el valor y la estructura resultante viajan
+;;     juntos sin mutar nada.
 
 (define-module (data_structures_basics)
   #:use-module (srfi srfi-9)
@@ -119,71 +131,140 @@
 (define empty-stack (make-stack #f 0))
 (define empty-queue (make-queue #f #f 0))
 
-;; Esqueleto: devuelve una celda nueva con el enlace reemplazado.
+;; ---------------------------------------------------------------------------
+;; Ayudantes internos (no exportados): recorrer y reconstruir cadenas de nodos.
+;; ---------------------------------------------------------------------------
+
+;; Valores de la cadena, en orden.
+(define (chain-values head)
+  (let loop ((node head) (seen '()))
+    (if node
+        (loop (node-next node) (cons (node-value node) seen))
+        (reverse seen))))
+
+;; Cadena nueva a partir de valores en orden; devuelve (cons cabeza ultimo-nodo)
+;; o (cons #f #f) si no hay valores.
+(define (chain-from-values elements)
+  (let loop ((rest (reverse elements)) (next #f) (last #f))
+    (if (null? rest)
+        (cons next last)
+        (let ((node (make-node (car rest) next)))
+          (loop (cdr rest) node (if last last node))))))
+
+;; Quita la primera aparición de `value`; devuelve el par
+;; (restantes . encontrado?).
+(define (remove-first-value elements value)
+  (let loop ((rest elements) (kept '()))
+    (cond ((null? rest) (cons (reverse kept) #f))
+          ((equal? (car rest) value)
+           (cons (append (reverse kept) (cdr rest)) #t))
+          (else (loop (cdr rest) (cons (car rest) kept))))))
+
+;; LinkedList reconstruida desde valores en orden, con la cola reenganchada.
+(define (linked-list-from-values elements)
+  (let ((chain (chain-from-values elements)))
+    (make-linked-list (car chain) (cdr chain) (length elements))))
+
+;; Devuelve una celda nueva con el valor de `node` y el enlace reemplazado: el
+;; `set_next` de la especificación expresado en un lenguaje inmutable.
 (define (node-with-next node next)
-  #f)
+  (make-node (node-value node) next))
 
-;; Esqueleto: valor de la cabeza, o -1 cuando la lista está vacía.
+;; Valor de la cabeza, o -1 cuando la lista está vacía. No muta.
 (define (linked-list-head linked-list)
-  -1)
+  (let ((head (linked-list-head-field linked-list)))
+    (if head (node-value head) -1)))
 
-;; Esqueleto: #t solo si no hay nodos.
+;; #t solo si no hay nodos. O(1) sobre el enlace de cabeza.
 (define (linked-list-empty? linked-list)
-  #f)
+  (not (linked-list-head-field linked-list)))
 
-;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
+;; Número de nodos. O(1) sobre el contador.
 (define (linked-list-size linked-list)
-  -1)
+  (linked-list-count-field linked-list))
 
-;; Esqueleto: devuelve una lista nueva con `value` al principio.
+;; Inserta `value` al principio y devuelve la lista nueva. O(1).
 (define (linked-list-insert-head linked-list value)
-  #f)
+  (let* ((head (linked-list-head-field linked-list))
+         (node (make-node value head))
+         (tail (linked-list-tail-field linked-list)))
+    (make-linked-list node
+                      (if tail tail node)
+                      (+ 1 (linked-list-count-field linked-list)))))
 
-;; Esqueleto: devuelve una lista nueva con `value` al final.
+;; Inserta `value` al final y devuelve la lista nueva. O(n): los nodos son
+;; inmutables y el último enlace solo se puede rehacer copiando el camino.
 (define (linked-list-insert-tail linked-list value)
-  #f)
+  (linked-list-from-values
+   (append (chain-values (linked-list-head-field linked-list))
+           (list value))))
 
-;; Esqueleto: devuelve una lista nueva sin la primera aparición de `value`,
-;; o #f si el valor no estaba. O(n).
+;; Borra la primera aparición de `value` y devuelve la lista nueva —puede quedar
+;; vacía—; #f si el valor no estaba o si la lista ya estaba vacía. O(n).
 (define (linked-list-delete linked-list value)
-  #f)
+  (let ((result (remove-first-value
+                 (chain-values (linked-list-head-field linked-list))
+                 value)))
+    (if (cdr result)
+        (linked-list-from-values (car result))
+        #f)))
 
-;; Esqueleto: #t solo si no hay nodos.
+;; #t solo si no hay nodos. O(1) sobre la cima.
 (define (stack-empty? stack)
-  #f)
+  (not (stack-top-field stack)))
 
-;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
+;; Número de nodos. O(1) sobre el contador.
 (define (stack-size stack)
-  -1)
+  (stack-count-field stack))
 
-;; Esqueleto: devuelve una pila nueva con `value` en la cima.
+;; Apila `value` sobre `top` y devuelve la pila nueva. O(1).
 (define (stack-push stack value)
-  #f)
+  (make-stack (make-node value (stack-top-field stack))
+              (+ 1 (stack-count-field stack))))
 
-;; Esqueleto: (cons valor pila-nueva) o #f cuando está vacía.
+;; Desapila: (cons valor pila-nueva); #f cuando está vacía. O(1).
 (define (stack-pop stack)
-  (cons -1 stack))
+  (let ((top (stack-top-field stack)))
+    (if top
+        (cons (node-value top)
+              (make-stack (node-next top)
+                          (- (stack-count-field stack) 1)))
+        #f)))
 
-;; Esqueleto: valor de la cima, o -1 cuando está vacía. No muta.
+;; Valor de la cima, o -1 cuando está vacía. No muta.
 (define (stack-peek stack)
-  -1)
+  (let ((top (stack-top-field stack)))
+    (if top (node-value top) -1)))
 
-;; Esqueleto: #t solo si no hay nodos.
+;; #t solo si no hay nodos. O(1) sobre el frente.
 (define (queue-empty? queue)
-  #f)
+  (not (queue-front-field queue)))
 
-;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
+;; Número de nodos. O(1) sobre el contador.
 (define (queue-size queue)
-  -1)
+  (queue-count-field queue))
 
-;; Esqueleto: devuelve una cola nueva con `value` al final.
+;; Encola `value` por `rear` y devuelve la cola nueva. O(n): los nodos son
+;; inmutables y el último enlace solo se puede rehacer copiando el camino.
 (define (queue-enqueue queue value)
-  #f)
+  (let* ((elements (append (chain-values (queue-front-field queue))
+                           (list value)))
+         (chain (chain-from-values elements)))
+    (make-queue (car chain) (cdr chain) (length elements))))
 
-;; Esqueleto: (cons valor cola-nueva) o #f cuando está vacía.
+;; Desencola: (cons valor cola-nueva); #f cuando está vacía. O(1): `front` avanza
+;; un nodo y el último nodo no cambia salvo que la cola quede vacía.
 (define (queue-dequeue queue)
-  (cons -1 queue))
+  (let ((front (queue-front-field queue)))
+    (if front
+        (let ((next (node-next front)))
+          (cons (node-value front)
+                (make-queue next
+                            (if next (queue-rear-field queue) #f)
+                            (- (queue-count-field queue) 1))))
+        #f)))
 
-;; Esqueleto: valor del frente, o -1 cuando está vacía. No muta.
+;; Valor del frente, o -1 cuando está vacía. No muta.
 (define (queue-peek queue)
-  -1)
+  (let ((front (queue-front-field queue)))
+    (if front (node-value front) -1)))

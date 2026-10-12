@@ -16,6 +16,18 @@
 ;;
 ;; Aislamiento: al ser inmutable, las constantes vacías se comparten sin copia;
 ;; los escenarios de borrado y desapilado reutilizan el mismo valor encadenado.
+;;
+;; Corrección 4d (2026-10-11): dos defectos de la primera versión, los dos de la
+;; trayectoria de los datos y ninguno del contrato:
+;;   - «LinkedList size should not change when delete reports failure» comparaba el
+;;     mismo borrado dos veces —como lista de tamaño 2 y como #f—: con estructuras
+;;     inmutables la segunda comprobación tiene que partir del primer resultado.
+;;     Ahora borra sobre lo ya borrado: `(linked-list-delete (linked-list-delete
+;;     list 2) 2)`.
+;;   - los `let*` internos de Stack y Queue reapuntaban la estructura a `(cdr par)`
+;;     antes de desapilar, así que las aserciones de «vacía» miraban una estructura
+;;     con un elemento todavía dentro. Ahora sale primero el par y la estructura ya
+;;     vaciada, después.
 
 (use-modules (srfi srfi-64))
 (load "../src/data_structures_basics.scm")
@@ -180,9 +192,9 @@
   (test-equal "LinkedList size should be 2 after one removal"
               2
               (linked-list-size (linked-list-delete list 2)))
-  (test-equal "LinkedList size should not change when delete reports failure"
+  (test-equal "LinkedList delete should report failure for a value already removed"
               #f
-              (linked-list-delete list 2)))
+              (linked-list-delete (linked-list-delete list 2) 2)))
 
 ;; ---------------------------------------------------------------------------
 ;; Stack
@@ -235,8 +247,9 @@
     (test-equal "Stack pop should return the next value in LIFO order"
                 2
                 (car popped))
-    (let* ((stack (cdr popped))
-           (popped (stack-pop stack)))
+    (let* ((rest (cdr popped))
+           (popped (stack-pop rest))
+           (stack (cdr popped)))
       (test-equal "Stack pop should return the first pushed value last"
                   1
                   (car popped))
@@ -331,8 +344,9 @@
     (test-equal "Queue dequeue should return the next value in FIFO order"
                 2
                 (car dequeued))
-    (let* ((queue (cdr dequeued))
-           (dequeued (queue-dequeue queue)))
+    (let* ((rest (cdr dequeued))
+           (dequeued (queue-dequeue rest))
+           (queue (cdr dequeued)))
       (test-equal "Queue dequeue should return the last enqueued value last"
                   3
                   (car dequeued))
