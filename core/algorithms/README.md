@@ -11,6 +11,7 @@ Los módulos de esta fase trabajan de forma **funcional**: reciben una lista de 
 | Módulo | Especificación | Enfoque | Tests | Estado |
 |--------|---------------|---------|:-----:|:------:|
 | [`naive_sort/`](naive_sort/) | [05_Naive_Sort](https://yorche3.github.io/programming_languages/core/algorithms/05_Naive_Sort/) | `guile` (SRFI-64) y `mit-scheme` + `scmunit` | 24 | ✅ |
+| [`data_structures_basics/`](data_structures_basics/) | [06_Data_Structures_Basics](https://yorche3.github.io/programming_languages/core/algorithms/06_Data_Structures_Basics/) | `guile` (SRFI-64) | 85 | ✅ |
 
 ---
 
@@ -18,13 +19,20 @@ Los módulos de esta fase trabajan de forma **funcional**: reciben una lista de 
 
 ```text
 algorithms/
-└── naive_sort/                        # 05_Naive_Sort
-    ├── .gitignore                     # *.log
+├── naive_sort/                                # 05_Naive_Sort
+│   ├── .gitignore                             # *.log
+│   ├── src/
+│   │   └── naive_sort.scm                     # 3 funciones + helper remove-first
+│   ├── test/
+│   │   ├── naive_sort_tests_guile.scm         # GNU Guile + SRFI-64
+│   │   └── naive_sort_tests.scm               # MIT/GNU Scheme + scmunit
+│   └── README.md
+└── data_structures_basics/                    # 06_Data_Structures_Basics
+    ├── .gitignore                             # *.log
     ├── src/
-    │   └── naive_sort.scm             # 3 funciones + helper remove-first
+    │   └── data_structures_basics.scm         # SRFI-9 records: Node, LinkedList, Stack, Queue
     ├── test/
-    │   ├── naive_sort_tests_guile.scm # GNU Guile + SRFI-64
-    │   └── naive_sort_tests.scm       # MIT/GNU Scheme + scmunit
+    │   └── data_structures_basics_tests_guile.scm # GNU Guile + SRFI-64
     └── README.md
 ```
 
@@ -59,6 +67,10 @@ algorithms/
 cd naive_sort/test
 guile --no-auto-compile -s naive_sort_tests_guile.scm
 SCMUNIT_PATH="$HOME/.local/share/scmunit/scmunit.scm" mit-scheme --quiet --load naive_sort_tests.scm
+
+# Data Structures Basics Tests
+cd ../../data_structures_basics/test
+guile --no-auto-compile -s data_structures_basics_tests_guile.scm
 ```
 
 ---

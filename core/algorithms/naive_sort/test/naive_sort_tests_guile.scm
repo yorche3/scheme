@@ -11,6 +11,7 @@
 
 (use-modules (srfi srfi-64))
 (load "../src/naive_sort.scm")
+(use-modules (naive_sort))
 
 ;; Entradas de la especificación
 (define standard-input '(5 2 9 1 5 6))
