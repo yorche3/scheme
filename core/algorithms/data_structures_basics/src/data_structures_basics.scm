@@ -13,18 +13,20 @@
 ;;               queue-peek, queue-size
 ;;   Estado vacío: empty-linked-list, empty-stack, empty-queue
 ;;
-;; Adecuaciones de centinela de esta fase (las del borrador del autor):
-;;   - El enlace ausente es #f: `empty-linked-list`, `empty-stack` y `empty-queue`
-;;     son el estado inicial.
-;;   - Las lecturas enteras que pueden fallar devuelven #f: linked-list-head,
-;;     stack-peek y queue-peek.
-;;   - Las operaciones que devuelven una estructura nueva devuelven #f mientras
-;;     son esqueletos: node-with-next, linked-list-insert-head,
-;;     linked-list-insert-tail, linked-list-delete, stack-push, stack-pop,
-;;     queue-enqueue y queue-dequeue (estas dos, además, devuelven
-;;     (cons valor estructura-nueva) cuando hay valor).
-;;   - Las booleanas devuelven #f: linked-list-empty?, stack-empty?, queue-empty?.
-;;   - Los tamaños devuelven 0: linked-list-size, stack-size, queue-size.
+;; Adecuaciones de centinela de esta fase (todavía no hay fallos reales: son
+;; centinelas, uno por tipo de retorno):
+;;   - **int → -1**: las lecturas enteras que pueden fallar (`linked-list-head`,
+;;     `stack-peek`, `queue-peek`) y los tamaños mientras son esqueletos
+;;     (`linked-list-size`, `stack-size`, `queue-size`).
+;;   - **bool → #f**: `linked-list-empty?`, `stack-empty?`, `queue-empty?`.
+;;   - **Solo las estructuras y los nodos usan nulo (#f)**: el enlace ausente
+;;     (`node-next`), `node-with-next`, las operaciones que devuelven una
+;;     estructura nueva mientras son esqueletos (`linked-list-insert-head`,
+;;     `linked-list-insert-tail`, `linked-list-delete`, `stack-push`,
+;;     `queue-enqueue`) y el resultado de `stack-pop`/`queue-dequeue`, que es
+;;     `(cons valor estructura-nueva)` o `#f` cuando está vacía.
+;;   - Los esqueletos de `stack-pop` y `queue-dequeue` devuelven
+;;     `(cons -1 <la misma estructura>)`: el centinela entero viaja en el par.
 ;;   - Ningún cuerpo llama a `error` ni lanza excepciones: son esqueletos.
 ;;
 ;; Forma: módulo de Guile (`define-module`), el idioma de Guile y el estándar
@@ -121,17 +123,17 @@
 (define (node-with-next node next)
   #f)
 
-;; Esqueleto: valor de la cabeza, o #f cuando la lista está vacía.
+;; Esqueleto: valor de la cabeza, o -1 cuando la lista está vacía.
 (define (linked-list-head linked-list)
-  #f)
+  -1)
 
 ;; Esqueleto: #t solo si no hay nodos.
 (define (linked-list-empty? linked-list)
   #f)
 
-;; Esqueleto: número de nodos (0 con la lista recién creada).
+;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
 (define (linked-list-size linked-list)
-  0)
+  -1)
 
 ;; Esqueleto: devuelve una lista nueva con `value` al principio.
 (define (linked-list-insert-head linked-list value)
@@ -150,9 +152,9 @@
 (define (stack-empty? stack)
   #f)
 
-;; Esqueleto: número de nodos (0 con la pila recién creada).
+;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
 (define (stack-size stack)
-  0)
+  -1)
 
 ;; Esqueleto: devuelve una pila nueva con `value` en la cima.
 (define (stack-push stack value)
@@ -160,19 +162,19 @@
 
 ;; Esqueleto: (cons valor pila-nueva) o #f cuando está vacía.
 (define (stack-pop stack)
-  #f)
+  (cons -1 stack))
 
-;; Esqueleto: valor de la cima, o #f cuando está vacía. No muta.
+;; Esqueleto: valor de la cima, o -1 cuando está vacía. No muta.
 (define (stack-peek stack)
-  #f)
+  -1)
 
 ;; Esqueleto: #t solo si no hay nodos.
 (define (queue-empty? queue)
   #f)
 
-;; Esqueleto: número de nodos (0 con la cola recién creada).
+;; Esqueleto: número de nodos (el centinela es -1 hasta el paso 5).
 (define (queue-size queue)
-  0)
+  -1)
 
 ;; Esqueleto: devuelve una cola nueva con `value` al final.
 (define (queue-enqueue queue value)
@@ -180,8 +182,8 @@
 
 ;; Esqueleto: (cons valor cola-nueva) o #f cuando está vacía.
 (define (queue-dequeue queue)
-  #f)
+  (cons -1 queue))
 
-;; Esqueleto: valor del frente, o #f cuando está vacía. No muta.
+;; Esqueleto: valor del frente, o -1 cuando está vacía. No muta.
 (define (queue-peek queue)
-  #f)
+  -1)
