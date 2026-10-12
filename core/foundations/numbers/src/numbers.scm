@@ -1,3 +1,20 @@
+(define-module (numbers)
+  #:export (sum_of_first_n_rec
+            factorial_rec
+            fibonacci_rec
+            greatest_common_divisor_rec
+            least_common_multiple_rec
+            sum_of_first_n_acc
+            factorial_acc
+            fibonacci_acc
+            greatest_common_divisor_acc
+            least_common_multiple_acc
+            sum_of_first_n_ite
+            factorial_ite
+            fibonacci_ite
+            greatest_common_divisor_ite
+            least_common_multiple_ite))
+
 (define (sum_of_first_n_rec n)
   (if (<= n 0)
       0

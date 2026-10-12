@@ -18,6 +18,12 @@
 ;; esqueleto y las pruebas unitarias.
 ;; Elimina la primera aparición de x; `remove` es de SRFI-1 y no está en el
 ;; entorno base de Guile ni de MIT/GNU Scheme.
+
+(define-module (naive_sort)
+  #:export (selection-sort
+            bubble-sort
+            insertion-sort))
+
 (define (remove-first x lst)
   (cond ((null? lst) '())
         ((= (car lst) x) (cdr lst))

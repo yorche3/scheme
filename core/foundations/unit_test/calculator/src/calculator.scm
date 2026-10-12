@@ -1,3 +1,10 @@
+(define-module (calculator)
+  #:export (addition
+            subtraction
+            multiplication
+            division
+            modulus))
+
 (define (addition a b)
   (+ a b))
 

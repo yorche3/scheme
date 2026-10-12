@@ -1,5 +1,6 @@
 (use-modules (srfi srfi-64))
 (load "../src/calculator.scm")
+(use-modules (calculator))
 
 (test-begin "calculator")
 

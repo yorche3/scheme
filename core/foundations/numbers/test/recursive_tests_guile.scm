@@ -1,5 +1,6 @@
 (use-modules (srfi srfi-64))
 (load "../src/numbers.scm")
+(use-modules (numbers))
 
 (test-begin "recursive")
 
