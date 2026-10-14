@@ -1,3 +1,3 @@
-(display "Hello, World! from Scheme")
+(display "Hello, World! from Scheme!")
 (newline)
 (exit)

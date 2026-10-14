@@ -51,7 +51,7 @@ El flujo del programa es:
 No se requieren archivos de configuración de build. El programa utiliza únicamente procedimientos estándar de Scheme.
 
 ```scheme
-(display "Hello, World! from Scheme")
+(display "Hello, World! from Scheme!")
 (newline)
 (exit)
 ```
@@ -61,7 +61,7 @@ No se requieren archivos de configuración de build. El programa utiliza únicam
 | `(display ...)` | Escribe la cadena en la salida estándar sin añadir un salto de línea. |
 | `(newline)` | Escribe un salto de línea en la salida estándar. |
 | `(exit)` | Finaliza explícitamente la ejecución del programa. |
-| `"Hello, World! from Scheme"` | Cadena que se muestra al usuario. |
+| `"Hello, World! from Scheme!"` | Cadena que se muestra al usuario. |
 
 ---
 
