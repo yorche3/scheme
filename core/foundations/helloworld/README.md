@@ -65,7 +65,7 @@ No se requieren archivos de configuración de build. El programa utiliza únicam
 
 ---
 
-## 🚀 Ejecución / Run
+## 🚀 Compilación y ejecución / Build & Run
 
 ### Requisitos / Requirements
 
@@ -98,10 +98,10 @@ guile -s hello_world.scm
 ### Salida esperada / Expected output
 
 ```text
-Hello, World! from Scheme
+Hello, World! from Scheme!
 ```
 
-La salida verificada con MIT/GNU Scheme y GNU Guile es equivalente y contiene un salto de línea al final.
+La salida verificada con MIT/GNU Scheme y GNU Guile es equivalente y contiene un salto de línea al final, que añade `(newline)`.
 
 ---
 
