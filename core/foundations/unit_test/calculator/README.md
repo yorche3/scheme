@@ -62,7 +62,7 @@ La separación de suites evita mezclar las APIs de `scmunit` y SRFI-64, que no s
 
 ---
 
-## 🚀 Ejecución / Run
+## 🚀 Compilación y ejecución / Build & Run
 
 ### Requisitos comunes / Common requirements
 
