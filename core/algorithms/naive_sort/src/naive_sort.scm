@@ -14,8 +14,9 @@
 ;; `#f`; si está vacía devuelve la misma lista vacía (`'()`). No lanza
 ;; excepciones.
 ;;
-;; Implementación pendiente: la escribe el autor. Esta delegación solo genera el
-;; esqueleto y las pruebas unitarias.
+;; El mínimo se busca comparando paso a paso (`min-element`): la `min` de la
+;; biblioteca no se usa, porque el módulo exige la búsqueda elemento a elemento
+;; y no una selección delegada.
 ;; Elimina la primera aparición de x; `remove` es de SRFI-1 y no está en el
 ;; entorno base de Guile ni de MIT/GNU Scheme.
 
@@ -29,6 +30,15 @@
         ((= (car lst) x) (cdr lst))
         (else (cons (car lst) (remove-first x (cdr lst))))))
 
+;; Mínimo de una lista no vacía recorriendo elemento a elemento. Devuelve el
+;; valor, no la posición; `remove-first` se encarga de extraerlo después.
+(define (min-element lst)
+  (let loop ((rest (cdr lst))
+             (best (car lst)))
+    (cond ((null? rest) best)
+          ((< (car rest) best) (loop (cdr rest) (car rest)))
+          (else (loop (cdr rest) best)))))
+
 (define (selection-sort arr)
   (if (not (list? arr))
       #f
@@ -36,7 +46,7 @@
                  (sorted '()))
         (if (null? unsorted)
             (reverse sorted)
-            (let* ((min (apply min unsorted))
+            (let* ((min (min-element unsorted))
                    (rest (remove-first min unsorted)))
               (loop rest (cons min sorted)))))))
 
