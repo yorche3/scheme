@@ -12,6 +12,7 @@ Los módulos de esta fase trabajan de forma **funcional**: reciben una lista de 
 |--------|---------------|---------|:-----:|:------:|
 | [`naive_sort/`](naive_sort/) | [05_Naive_Sort](https://yorche3.github.io/programming_languages/core/algorithms/05_Naive_Sort/) | `guile` (SRFI-64) y `mit-scheme` + `scmunit` | 24 | ✅ |
 | [`data_structures_basics/`](data_structures_basics/) | [06_Data_Structures_Basics](https://yorche3.github.io/programming_languages/core/algorithms/06_Data_Structures_Basics/) | `guile` (SRFI-64) | 85 | ✅ |
+| [`data_structures_advanced/`](data_structures_advanced/) | [07_Data_Structures_Advanced](https://yorche3.github.io/programming_languages/core/algorithms/07_Data_Structures_Advanced/) | `guile` (SRFI-64) | 149 | ✅ |
 
 ---
 
@@ -27,12 +28,19 @@ algorithms/
 │   │   ├── naive_sort_tests_guile.scm         # GNU Guile + SRFI-64
 │   │   └── naive_sort_tests.scm               # MIT/GNU Scheme + scmunit
 │   └── README.md
-└── data_structures_basics/                    # 06_Data_Structures_Basics
+├── data_structures_basics/                    # 06_Data_Structures_Basics
+│   ├── .gitignore                             # *.log
+│   ├── src/
+│   │   └── data_structures_basics.scm         # SRFI-9 records: Node, LinkedList, Stack, Queue
+│   ├── test/
+│   │   └── data_structures_basics_tests_guile.scm # GNU Guile + SRFI-64
+│   └── README.md
+└── data_structures_advanced/                  # 07_Data_Structures_Advanced
     ├── .gitignore                             # *.log
     ├── src/
-    │   └── data_structures_basics.scm         # SRFI-9 records: Node, LinkedList, Stack, Queue
+    │   └── data_structures_advanced.scm       # R7RS library: Node, TreeNode, BinaryTree, GraphNode, Graph
     ├── test/
-    │   └── data_structures_basics_tests_guile.scm # GNU Guile + SRFI-64
+    │   └── data_structures_advanced_tests_guile.scm # GNU Guile + SRFI-64
     └── README.md
 ```
 
@@ -71,6 +79,10 @@ SCMUNIT_PATH="$HOME/.local/share/scmunit/scmunit.scm" mit-scheme --quiet --load 
 # Data Structures Basics Tests
 cd ../../data_structures_basics/test
 guile --no-auto-compile -s data_structures_basics_tests_guile.scm
+
+# Data Structures Advanced Tests
+cd ../../data_structures_advanced/test
+guile --no-auto-compile -s data_structures_advanced_tests_guile.scm
 ```
 
 ---

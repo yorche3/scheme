@@ -12,7 +12,7 @@ Racket no se utiliza como equivalente de MIT/GNU Scheme o Guile en este director
 | ------ | ----------- |
 | [`core/`](core/) | Implementaciones de los módulos Core del roadmap. |
 | [`core/foundations/`](core/foundations/) | **Fase 0 — Fundamentos**: `helloworld`, `hellouser`, `unit_test/calculator`, `numbers` |
-| [`core/algorithms/`](core/algorithms/) | **Fase 1 — Algoritmos Puros**: `naive_sort`, `data_structures_basics` |
+| [`core/algorithms/`](core/algorithms/) | **Fase 1 — Algoritmos Puros**: `naive_sort`, `data_structures_basics`, `data_structures_advanced` |
 
 ---
 
@@ -64,6 +64,13 @@ SCMUNIT_PATH="$HOME/.local/share/scmunit/scmunit.scm" mit-scheme --quiet --load 
 ```bash
 cd core/algorithms/data_structures_basics/test
 guile --no-auto-compile -s data_structures_basics_tests_guile.scm
+```
+
+### Data Structures Advanced tests
+
+```bash
+cd core/algorithms/data_structures_advanced/test
+guile --no-auto-compile -s data_structures_advanced_tests_guile.scm
 ```
 
 ---
